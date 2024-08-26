@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trình Biên Dịch Mã</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: white;
+            border-bottom: 1px solid #000;
+            padding: 10px 20px;
+        }
+        .logo {
+            width: 40px;
+            height: 30px;
+            background-image: url('https://scontent.xx.fbcdn.net/v/t1.15752-9/457042786_1053543373164877_3042311667650024442_n.png?stp=dst-png_s206x206&_nc_cat=109&ccb=1-7&_nc_sid=0024fc&_nc_ohc=kpC26VIZ4O4Q7kNvgHdRHK1&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_Q7cD1QHlK6_Hu_3MtcqJpfhbo9O00sSGzMIit1D3-Mwj10QtIQ&oe=66F3A971'); /* Thay đổi link đến logo của bạn */
+            background-size: cover;
+            margin-right: 10px;
+        }
+        .right-section {
+            display: flex;
+            align-items: center;
+        }
+        .toggle-button {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .toggle-button input {
+            display: none;
+        }
+        .toggle-button label {
+            width: 40px;
+            height: 20px;
+            background-color: #ccc;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .toggle-button label:before {
+            content: '';
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            left: 2px;
+            transition: 0.3s;
+        }
+        .toggle-button input:checked + label {
+            background-color: #007BFF;
+        }
+        .toggle-button input:checked + label:before {
+            transform: translateX(20px);
+        }
+        .user-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: gray;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            padding: 10px 0;
+            background-color: #f8f8f8;
+            border-top: 1px solid #ccc;
+            transition: background-color 0.3s;
+        }
+        .button {
+            margin: 0 10px;
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .dark-mode .button-container {
+            background-color: #333;
+        }
+        .dark-mode .button {
+            background-color: #007BFF;
+            color: white;
+        }
+        .dark-mode .button:hover {
+            background-color: #0056b3;
+        }
+        .dark-mode {
+            background-color: #222;
+            color: #fff;
+        }
+        .code-area {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            margin: 20px;
+            border-radius: 5px;
+            background-color: #f8f8f8;
+        }
+        .dark-mode .code-area {
+            background-color: #555;
+            border-color: #777;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            resize: none;
+        }
+        .run-button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .run-button:hover {
+            background-color: #218838;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .dark-mode .output {
+            background-color: #444;
+            border-color: #666;
+        }
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .icon {
+            width: 20px;
+            height: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .folder-button {
+            margin-left: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        .folder-button:hover {
+            background-color: #0056b3;
+        }
+        .folder-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .folder-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+        }
+        .folder-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .folder-list-item {
+            padding: 5px;
+            border: 1px solid #ccc;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .folder-list-item:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toolbar">
+        <div class="logo"></div>
+        <div class="right-section">
+            <div class="toggle-button">
+                <input type="checkbox" id="toggle" onclick="toggleMode()">
+                <label for="toggle"></label>
+            </div>
+            <div class="user-icon"></div>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button class="button" onclick="showCodeArea('html')">HTML</button>
+        <button class="button" onclick="showCodeArea('python')">Python</button>
+        <button class="button" onclick="showCodeArea('css')">CSS</button>
+        <button class="button" onclick="showCodeArea('js')">JS</button>
+        <button class="folder-button" onclick="openFolderModal()">Thư Mục</button>
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAgn0oY3qRYUMGi3608UW6RB_HMud_TffDpg&s" alt="Copy" class="icon" onclick="copyCode()">
+        <img src="data:image/png;base64,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" alt="Save" class="icon" onclick="saveCode()">
+    </div>
+
+    <div id="codeArea" class="code-area">
+        <textarea id="codeInput" placeholder="Nhập mã ở đây..."></textarea>
+        <button class="run-button" onclick="runCode()">▶ Chạy Mã</button>
+        <div id="output" class="output"></div>
+        <iframe id="resultFrame"></iframe>
+    </div>
+
+    <div id="folderModal" class="folder-modal">
+        <div class="folder-content">
+            <h3>Mã Đã Lưu</h3>
+            <div class="folder-list" id="folderList"></div>
+            <button onclick="closeFolderModal()">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        const savedCodes = JSON.parse(localStorage.getItem('savedCodes')) || {};
+
+        function toggleMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('mode', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+
+        window.onload = function() {
+            const mode = localStorage.getItem('mode');
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('toggle').checked = true;
+            }
+            renderSavedCodes();
+        };
+
+        function showCodeArea(language) {
+            const codeArea = document.getElementById('codeArea');
+            codeArea.style.display = 'block';
+            document.getElementById('codeInput').value = savedCodes[language] || ''; // Tải mã đã lưu
+            document.getElementById('output').innerHTML = ''; // Xóa kết quả trước đó
+            document.getElementById('resultFrame').srcdoc = ''; // Xóa nội dung iframe
+            codeArea.setAttribute('data-language', language);
+        }
+
+        function runCode() {
+            const codeInput = document.getElementById('codeInput').value;
+            const language = document.getElementById('codeArea').getAttribute('data-language');
+            const iframe = document.getElementById('resultFrame');
+
+            if (language === 'html') {
+                iframe.srcdoc = codeInput; // Thực thi mã HTML
+            } else if (language === 'css') {
+                iframe.srcdoc = `<style>${codeInput}</style>`; // Thực thi mã CSS
+            } else if (language === 'js') {
+                iframe.srcdoc = `<script>${codeInput}<\/script>`; // Thực thi mã JavaScript
+            } else if (language === 'python') {
+                document.getElementById('output').innerHTML = 'Không thể chạy mã Python trong trình duyệt!';
+            }
+        }
+
+        function copyCode() {
+            const codeInput = document.getElementById('codeInput');
+            codeInput.select();
+            document.execCommand('copy');
+            alert('Đã sao chép');
+        }
+
+        function saveCode() {
+            const codeInput = document.getElementById('codeInput').value;
+            const language = document.getElementById('codeArea').getAttribute('data-language');
+            savedCodes[language] = codeInput;
+            localStorage.setItem('savedCodes', JSON.stringify(savedCodes));
+            alert('Đã lưu mã');
+            renderSavedCodes();
+        }
+
+        function renderSavedCodes() {
+            const folderList = document.getElementById('folderList');
+            folderList.innerHTML = ''; // Xóa danh sách hiện tại
+            for (const lang in savedCodes) {
+                const item = document.createElement('div');
+                item.className = 'folder-list-item';
+                item.textContent = `${lang}: ${savedCodes[lang].substring(0, 20)}...`; // Hiển thị 20 ký tự đầu
+                item.onclick = () => loadSavedCode(lang);
+                folderList.appendChild(item);
+            }
+        }
+
+        function loadSavedCode(language) {
+            document.getElementById('codeInput').value = savedCodes[language]; // Tải mã đã lưu vào ô nhập
+            closeFolderModal();
+            showCodeArea(language);
+        }
+
+        function openFolderModal() {
+            document.getElementById('folderModal').style.display = 'flex';
+            renderSavedCodes(); // Cập nhật danh sách mã đã lưu
+        }
+
+        function closeFolderModal() {
+            document.getElementById('folderModal').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
